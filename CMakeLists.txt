@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(lru_cache INTERFACE)
 target_include_directories(lru_cache INTERFACE src)
 
-# --- tests (GoogleTest via FetchContent) ---
+# --- tests + benchmarks (FetchContent) ---
 # FetchContent downloads + builds gtest as part of this project at configure
 # time. No system install required; the pinned GIT_TAG makes the build
 # reproducible. On Windows/MSVC, gtest_force_shared_crt makes gtest use the
@@ -31,6 +31,18 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+FetchContent_Declare(
+  googlebenchmark
+  GIT_REPOSITORY https://github.com/google/benchmark.git
+  GIT_TAG        v1.9.1
+)
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googlebenchmark)
+
+add_executable(lru_cache_bench bench/lru_cache_bench.cpp)
+target_link_libraries(lru_cache_bench PRIVATE lru_cache benchmark::benchmark)
 
 add_executable(lru_cache_test
   test/lru_cache_tests.cpp
