@@ -99,7 +99,6 @@ jobs:
       - name: Generate coverage report
         run: |
           gcovr --root ${{github.workspace}} \
-            --object-directory ${{env.BUILD_DIR}} \
             --filter ${{github.workspace}}/src/ \
             --xml -o ${{env.COVERAGE_FILE}}
 
