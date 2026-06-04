@@ -100,8 +100,7 @@ jobs:
         run: |
           gcovr --root ${{github.workspace}} \
             --object-directory ${{env.BUILD_DIR}} \
-            --exclude '.*/_deps/.*' \
-            --exclude '.*/test/.*' \
+            --filter ${{github.workspace}}/src/ \
             --xml -o ${{env.COVERAGE_FILE}}
 
       - name: Upload coverage to Codecov
