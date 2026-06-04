@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1780571963842,
+  "lastUpdate": 1780572731169,
   "repoUrl": "https://github.com/Carpe-Diem-77/lru-cache",
   "entries": {
     "LRU Cache Benchmark": [
@@ -120,6 +120,36 @@ window.BENCHMARK_DATA = {
             "value": 23.405124735445845,
             "unit": "ns/iter",
             "extra": "iterations: 30207452\ncpu: 23.399299517218466 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33997690+DeepWaterWhale@users.noreply.github.com",
+            "name": "DeepWaterWhale",
+            "username": "DeepWaterWhale"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "88d37975199cab0c55e8c37ddb474649ef381559",
+          "message": "Create codecov.yml (#12)",
+          "timestamp": "2026-06-04T19:31:19+08:00",
+          "tree_id": "ddf54520345115cd4634e7a5898e26188ffd4a53",
+          "url": "https://github.com/Carpe-Diem-77/lru-cache/commit/88d37975199cab0c55e8c37ddb474649ef381559"
+        },
+        "date": 1780572730812,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_PutGet",
+            "value": 29.867822284144683,
+            "unit": "ns/iter",
+            "extra": "iterations: 23066687\ncpu: 29.865334497320752 ns\nthreads: 1"
           }
         ]
       }
