@@ -1,0 +1,4 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "ccls.misc.compilationDatabaseDirectory": "${workspaceFolder}/build"
+}
