@@ -7,6 +7,7 @@ on:
     branches: [main]
     types: [opened, synchronize]
 
+# Opt into Node.js 24 before the forced migration on 2026-06-16.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -14,14 +15,17 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write    # github-action-benchmark writes benchmark history to gh-pages
       deployments: write
+    # Serialize gh-pages writes so concurrent jobs don't produce push conflicts.
     concurrency:
       group: gh-pages
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
+      # Restore FetchContent downloads (googletest, googlebenchmark) across runs.
+      # Cache is keyed on CMakeLists.txt so a dependency version bump busts it.
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -37,6 +41,9 @@ jobs:
       - name: Benchmark
         run: ${{github.workspace}}/build/lru_cache_bench --benchmark_format=json --benchmark_out=${{github.workspace}}/benchmark_result.json
 
+      # Appends results to gh-pages and renders the trend chart.
+      # auto-push is gated on push (not pull_request) to avoid write-access
+      # failures from fork PRs, while still running the comparison on PRs.
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1.22.1
         with:
@@ -46,16 +53,11 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           auto-push: ${{github.event_name == 'push'}}
           alert-threshold: 200%
-          comment-on-alert: true
-          fail-on-alert: true
+          comment-on-alert: true  # posts on the merge commit when a regression slips through
+          fail-on-alert: true     # also fails the PR job if the branch itself regresses
 
   asan-ubsan:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    concurrency:
-      group: gh-pages
-      cancel-in-progress: false
     env:
       BUILD_DIR: ${{github.workspace}}/build-asan
       COVERAGE_FILE: ${{github.workspace}}/coverage.xml
@@ -71,15 +73,16 @@ jobs:
       - name: Install gcovr
         run: pip install gcovr
 
-      - name: Install lcov
-        run: sudo apt-get install -y lcov
-
       - name: Cache GoogleTest
         uses: actions/cache@v4
         with:
           path: ${{env.BUILD_DIR}}/_deps
           key: deps-asan-${{hashFiles('CMakeLists.txt')}}
 
+      # ASan catches use-after-free, buffer overflows, and related memory errors.
+      # UBSan catches undefined behaviour: signed overflow, null deref, bad shifts.
+      # --coverage instruments for line/branch coverage; the linker flag is also
+      # required because the coverage runtime is linked as a library.
       - name: Configure
         run: >
           cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Debug
@@ -95,52 +98,17 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          mkdir -p ${{github.workspace}}/coverage
           gcovr --root ${{github.workspace}} \
             --object-directory ${{env.BUILD_DIR}} \
             --exclude '.*/_deps/.*' \
             --exclude '.*/test/.*' \
             --xml -o ${{env.COVERAGE_FILE}}
-          lcov --directory ${{env.BUILD_DIR}} \
-            --capture \
-            --output-file ${{github.workspace}}/lcov.info
-          lcov --remove ${{github.workspace}}/lcov.info \
-            '*/test/*' '*/_deps/*' '/usr/*' \
-            --output-file ${{github.workspace}}/lcov.info
-          genhtml ${{github.workspace}}/lcov.info \
-            --output-directory ${{github.workspace}}/coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           files: ${{env.COVERAGE_FILE}}
           fail_ci_if_error: true
-
-      - name: Assemble Pages site
-        run: |
-          mkdir -p ${{github.workspace}}/site/coverage
-          cp -r ${{github.workspace}}/coverage/. ${{github.workspace}}/site/coverage/
-          cat > ${{github.workspace}}/site/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head><meta charset="utf-8"><title>lru-cache</title></head>
-          <body>
-            <h1>lru-cache</h1>
-            <ul>
-              <li><a href="dev/bench/">Benchmarks</a></li>
-              <li><a href="coverage/">Coverage</a></li>
-            </ul>
-          </body>
-          </html>
-          EOF
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        if: github.event_name == 'push'
-        with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          publish_dir: ${{github.workspace}}/site
-          keep_files: true
 
   tsan:
     runs-on: ubuntu-latest
@@ -155,6 +123,8 @@ jobs:
           path: ${{env.BUILD_DIR}}/_deps
           key: deps-tsan-${{hashFiles('CMakeLists.txt')}}
 
+      # TSan detects data races and deadlocks. It is incompatible with ASan/MSan
+      # due to conflicting shadow memory schemes, so it runs as a separate job.
       - name: Configure
         run: >
           cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Debug
@@ -167,5 +137,7 @@ jobs:
       - name: Test
         working-directory: ${{env.BUILD_DIR}}
         env:
+          # halt_on_error: exit immediately on first race instead of continuing.
+          # detect_deadlocks: also report mutex deadlocks, not just data races.
           TSAN_OPTIONS: "halt_on_error=1:detect_deadlocks=1"
         run: ctest --output-on-failure
