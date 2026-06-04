@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1780570912747,
+  "lastUpdate": 1780571597925,
   "repoUrl": "https://github.com/Carpe-Diem-77/lru-cache",
   "entries": {
     "LRU Cache Benchmark": [
@@ -60,6 +60,36 @@ window.BENCHMARK_DATA = {
             "value": 26.014223231885897,
             "unit": "ns/iter",
             "extra": "iterations: 27015379\ncpu: 26.01095916514812 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33997690+DeepWaterWhale@users.noreply.github.com",
+            "name": "DeepWaterWhale",
+            "username": "DeepWaterWhale"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "73b6e8b8b780576198dd87a4b8b52de28ab2e8c5",
+          "message": "Update ci.yml (#10)",
+          "timestamp": "2026-06-04T19:12:27+08:00",
+          "tree_id": "094cc68e0b5aacfdbfb02f7ac11baa4245dae671",
+          "url": "https://github.com/Carpe-Diem-77/lru-cache/commit/73b6e8b8b780576198dd87a4b8b52de28ab2e8c5"
+        },
+        "date": 1780571597053,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_PutGet",
+            "value": 33.29325749286117,
+            "unit": "ns/iter",
+            "extra": "iterations: 21302610\ncpu: 33.2870289603011 ns\nthreads: 1"
           }
         ]
       }
