@@ -100,13 +100,30 @@ jobs:
           files: ${{env.COVERAGE_FILE}}
           fail_ci_if_error: true
 
-      - name: Deploy coverage to GitHub Pages
+      - name: Assemble Pages site
+        run: |
+          mkdir -p ${{github.workspace}}/site/coverage
+          cp -r ${{github.workspace}}/coverage/. ${{github.workspace}}/site/coverage/
+          cat > ${{github.workspace}}/site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>lru-cache</title></head>
+          <body>
+            <h1>lru-cache</h1>
+            <ul>
+              <li><a href="dev/bench/">Benchmarks</a></li>
+              <li><a href="coverage/">Coverage</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         if: github.event_name == 'push'
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          publish_dir: ${{github.workspace}}/coverage
-          destination_dir: coverage
+          publish_dir: ${{github.workspace}}/site
           keep_files: true
 
   tsan:
