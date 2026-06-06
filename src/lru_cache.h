@@ -25,7 +25,7 @@ template <typename K,
 class LruCache {
 public:
   explicit LruCache(std::size_t capacity) : capacity_(capacity) {
-    assert(capacity > 0);
+    assert(capacity > 0); // LCOV_EXCL_LINE
   }
 
   LruCache(LruCache &&other) noexcept = default;
