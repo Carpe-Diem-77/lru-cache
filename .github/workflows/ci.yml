@@ -99,7 +99,6 @@ jobs:
       - name: Generate coverage report
         run: |
           gcovr --root ${{github.workspace}} \
-            --filter ${{github.workspace}}/src/ \
             --xml -o ${{env.COVERAGE_FILE}}
 
       - name: Upload coverage to Codecov
