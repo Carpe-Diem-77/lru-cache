@@ -13,4 +13,5 @@ cmake --build ./build
 ctest --test-dir ./build --output-on-failure
 ```
 
-Check code coverage in https://app.codecov.io/github/carpe-diem-77/lru-cache.
+Check code coverage at https://app.codecov.io/github/carpe-diem-77/lru-cache.
+Check benchmark at https://carpe-diem-77.github.io/lru-cache/.
