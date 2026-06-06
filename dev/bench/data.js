@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1780729197445,
+  "lastUpdate": 1780739028108,
   "repoUrl": "https://github.com/Carpe-Diem-77/lru-cache",
   "entries": {
     "LRU Cache Benchmark": [
@@ -180,6 +180,36 @@ window.BENCHMARK_DATA = {
             "value": 33.65948965077546,
             "unit": "ns/iter",
             "extra": "iterations: 20976499\ncpu: 33.653906926985286 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33997690+DeepWaterWhale@users.noreply.github.com",
+            "name": "DeepWaterWhale",
+            "username": "DeepWaterWhale"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "09ccc00613b098bcf7d11cc9e81b1cd14a427281",
+          "message": "Add more ut for 100 coverage (#14)\n\n* Add benchmark link\n\n* Switch to clangd instead of ccls\n\n* Reorder tests and add more tests for emplace\n\n* Exclude the lru_cache assert from coverage report",
+          "timestamp": "2026-06-06T17:43:23+08:00",
+          "tree_id": "cc4aff40933f45960b9a752040c5a34e8256140b",
+          "url": "https://github.com/Carpe-Diem-77/lru-cache/commit/09ccc00613b098bcf7d11cc9e81b1cd14a427281"
+        },
+        "date": 1780739027849,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_PutGet",
+            "value": 33.04784120099046,
+            "unit": "ns/iter",
+            "extra": "iterations: 20495493\ncpu: 33.043916533259285 ns\nthreads: 1"
           }
         ]
       }
