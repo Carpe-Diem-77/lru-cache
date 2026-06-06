@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1780572731169,
+  "lastUpdate": 1780729197445,
   "repoUrl": "https://github.com/Carpe-Diem-77/lru-cache",
   "entries": {
     "LRU Cache Benchmark": [
@@ -150,6 +150,36 @@ window.BENCHMARK_DATA = {
             "value": 29.867822284144683,
             "unit": "ns/iter",
             "extra": "iterations: 23066687\ncpu: 29.865334497320752 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33997690+DeepWaterWhale@users.noreply.github.com",
+            "name": "DeepWaterWhale",
+            "username": "DeepWaterWhale"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "593601ddb26a51cf3eb4ef4675b51a5574d8b4a1",
+          "message": "Add code coverage threshold (#13)",
+          "timestamp": "2026-06-06T14:59:19+08:00",
+          "tree_id": "18a7158801c9669266ad99cdfee486856629b1bb",
+          "url": "https://github.com/Carpe-Diem-77/lru-cache/commit/593601ddb26a51cf3eb4ef4675b51a5574d8b4a1"
+        },
+        "date": 1780729196606,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_PutGet",
+            "value": 33.65948965077546,
+            "unit": "ns/iter",
+            "extra": "iterations: 20976499\ncpu: 33.653906926985286 ns\nthreads: 1"
           }
         ]
       }
