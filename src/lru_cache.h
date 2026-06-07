@@ -6,7 +6,9 @@ CPP Idioms:
 shared_ptr<const V> is the right type.
 02. the semantics of put and emplace is different in this implementation, emplace is more for
 updating existing items, that's why we take const& key to void the copy of key here.
-
+03. Lock std::mutex it twice in the same thread will result in dead-lock. Need to use std::recursive_mutex.
+04. Mutex is not copyable and movable. Intentionally use a unique_ptr to make LruCache copyable and movable.
+But as in the real world, it should be rare to copy or move a cache.
 */
 
 #ifndef LRU_CACHE_H
@@ -16,6 +18,7 @@ updating existing items, that's why we take const& key to void the copy of key h
 #include <cstddef>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 template <typename K,
@@ -32,6 +35,8 @@ public:
   LruCache &operator=(LruCache &&other) noexcept = default;
 
   LruCache(const LruCache &other) {
+    // Can not copy the lock
+    std::lock_guard<std::recursive_mutex> guard(*mutex_);
     capacity_ = other.capacity_;
 
     for (auto it = other.list_.crbegin(); it != other.list_.crend(); ++it) {
@@ -40,6 +45,7 @@ public:
   }
 
   LruCache &operator=(const LruCache &other) {
+    std::lock_guard<std::recursive_mutex> guard(*mutex_);
     if (this != &other) {
       capacity_ = other.capacity_;
 
@@ -63,6 +69,7 @@ public:
   // If returns a shared_ptr<V>, caller can use *ptr to update the data inside the
   // cache directly, which is not something we want
   [[nodiscard]] std::shared_ptr<const V> get(const K &key) {
+    std::lock_guard<std::recursive_mutex> guard(*mutex_);
     auto iter = data_.find(key);
 
     if (iter == data_.end()) {
@@ -74,6 +81,7 @@ public:
   }
 
   void put(K key, V value) {
+    std::lock_guard<std::recursive_mutex> guard(*mutex_);
     auto iter = data_.find(key);
 
     if (iter == data_.end()) {
@@ -96,6 +104,7 @@ public:
   // (put already copied once when enter that method)
   template <typename... Args>
   void emplace(const K &key, Args &&...args) {
+    std::lock_guard<std::recursive_mutex> guard(*mutex_);
     auto iter = data_.find(key);
 
     if (iter == data_.end()) {
@@ -138,7 +147,7 @@ private:
   std::size_t capacity_;
   std::unordered_map<K, typename std::list<Entry>::iterator, Hash, KeyEqual> data_;
   std::list<Entry> list_;
-
+  std::unique_ptr<std::recursive_mutex> mutex_ = std::make_unique<std::recursive_mutex>();
   void evict() {
     data_.erase(list_.back().key);
     list_.pop_back();
