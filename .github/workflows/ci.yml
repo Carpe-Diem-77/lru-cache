@@ -123,10 +123,7 @@ jobs:
       # TSan detects data races and deadlocks. It is incompatible with ASan/MSan
       # due to conflicting shadow memory schemes, so it runs as a separate job.
       - name: Configure
-        run: >
-          cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_CXX_FLAGS="-fsanitize=thread"
-          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread"
+        run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Debug -DENABLE_TSAN=ON
 
       - name: Build
         run: cmake --build ${{env.BUILD_DIR}}
