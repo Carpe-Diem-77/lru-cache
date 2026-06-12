@@ -50,6 +50,13 @@ add_executable(lru_cache_test
 
 target_compile_options(lru_cache_test PRIVATE -Wall -Wextra -Wpedantic)
 
+option(ENABLE_TSAN "Build with ThreadSanitizer" OFF)
+if(ENABLE_TSAN)
+  add_compile_options(-fsanitize=thread)
+  add_link_options(-fsanitize=thread)
+  target_compile_options(lru_cache_test PRIVATE -DTSAN_ENABLED)
+endif()
+
 target_link_libraries(lru_cache_test PRIVATE
   lru_cache
   GTest::gtest_main   # provides `int main()` so we don't have to write one
