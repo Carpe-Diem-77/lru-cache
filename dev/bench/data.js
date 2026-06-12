@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1780739028108,
+  "lastUpdate": 1781251787417,
   "repoUrl": "https://github.com/Carpe-Diem-77/lru-cache",
   "entries": {
     "LRU Cache Benchmark": [
@@ -210,6 +210,36 @@ window.BENCHMARK_DATA = {
             "value": 33.04784120099046,
             "unit": "ns/iter",
             "extra": "iterations: 20495493\ncpu: 33.043916533259285 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33997690+DeepWaterWhale@users.noreply.github.com",
+            "name": "DeepWaterWhale",
+            "username": "DeepWaterWhale"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b7f1e82df5e8ebcc35e6a5d04323b8961341d9d1",
+          "message": "Add mutex for thread safety (#15)\n\n* add mutex\n\n* Add mutex for thread-safety\n\n* Update CMakeLists for compiling with tsan option\n\n* Fix cmake for concurrent UT\n\n* Add concurrent UTs\n\n* Revert the change in lunch.json",
+          "timestamp": "2026-06-12T16:08:30+08:00",
+          "tree_id": "123d2f66de8850e1f7b159b05834864e29322279",
+          "url": "https://github.com/Carpe-Diem-77/lru-cache/commit/b7f1e82df5e8ebcc35e6a5d04323b8961341d9d1"
+        },
+        "date": 1781251786556,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_PutGet",
+            "value": 42.51358016849781,
+            "unit": "ns/iter",
+            "extra": "iterations: 16499648\ncpu: 42.50798053388775 ns\nthreads: 1"
           }
         ]
       }
