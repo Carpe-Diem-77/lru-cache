@@ -163,6 +163,10 @@ private:
 
   // mutex, atomic<long> is not copyable or movable
   // so use a unique_ptr to make move assignment and move ctor work
+  // this is intentional here to understand the rule of five
+  // but usually mutex_ doesn't need to be a unique_ptr
+  // and in that case, we need to make it mutable becasue
+  // we need to
   std::unique_ptr<std::atomic_int64_t> miss_cnt_ =
       std::make_unique<std::atomic_int64_t>(0);
   std::unique_ptr<std::atomic_int64_t> hit_cnt_ =
