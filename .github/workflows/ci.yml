@@ -83,10 +83,13 @@ jobs:
       # UBSan catches undefined behaviour: signed overflow, null deref, bad shifts.
       # --coverage instruments for line/branch coverage; the linker flag is also
       # required because the coverage runtime is linked as a library.
+      # -fprofile-update=atomic makes gcov counters thread-safe; without it the
+      # multithreaded ThreadSafety tests race the counters and produce corrupted
+      # "taken -1" hit counts that gcovr rejects (GCC bug 68080).
       - name: Configure
         run: >
           cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined --coverage"
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined --coverage -fprofile-update=atomic"
           -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined --coverage"
 
       - name: Build
@@ -98,7 +101,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          gcovr --root ${{github.workspace}} \
+          gcovr --root ${{github.workspace}} --filter src/ \
             --xml -o ${{env.COVERAGE_FILE}}
 
       - name: Upload coverage to Codecov
