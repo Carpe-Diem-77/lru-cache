@@ -170,23 +170,42 @@
 
         function renderAllChars(dataSets) {
 
-          function renderGraph(parent, name, dataset) {
+          // Each `series` entry is { label, dataset, color }. A chart may hold
+          // the implementation and its unordered_map baseline as two lines.
+          function renderGraph(parent, name, series) {
             const canvas = document.createElement('canvas');
             canvas.className = 'benchmark-chart';
             parent.appendChild(canvas);
 
-            const color = toolColors[dataset.length > 0 ? dataset[0].tool : '_'];
-            const data = {
-              labels: dataset.map(d => d.commit.id.slice(0, 7)),
-              datasets: [
-                {
-                  label: name,
-                  data: dataset.map(d => d.bench.value),
-                  borderColor: color,
-                  backgroundColor: color + '60', // Add alpha for #rrggbbaa
+            // Unified commit axis across all series (ordered by first appearance).
+            const commitOrder = [];
+            const seen = new Set();
+            for (const s of series) {
+              for (const d of s.dataset) {
+                if (!seen.has(d.commit.id)) {
+                  seen.add(d.commit.id);
+                  commitOrder.push(d.commit.id);
                 }
-              ],
-            };
+              }
+            }
+            const labels = commitOrder.map(id => id.slice(0, 7));
+
+            // Align each series to the unified axis; keep aligned refs for tooltips.
+            const datasets = series.map(s => {
+              const byCommit = new Map(s.dataset.map(d => [d.commit.id, d]));
+              s.aligned = commitOrder.map(id => byCommit.get(id) || null);
+              return {
+                label: s.label,
+                data: s.aligned.map(d => d ? d.bench.value : null),
+                borderColor: s.color,
+                backgroundColor: s.color + '60', // Add alpha for #rrggbbaa
+                spanGaps: true,
+              };
+            });
+
+            const unit = series[0] && series[0].dataset.length > 0
+              ? series[0].dataset[0].bench.unit : '';
+            const data = { labels, datasets };
             const options = {
               scales: {
                 xAxes: [
@@ -201,7 +220,7 @@
                   {
                     scaleLabel: {
                       display: true,
-                      labelString: dataset.length > 0 ? dataset[0].bench.unit : '',
+                      labelString: unit,
                     },
                     ticks: {
                       beginAtZero: true,
@@ -212,22 +231,26 @@
               tooltips: {
                 callbacks: {
                   afterTitle: items => {
-                    const {index} = items[0];
-                    const data = dataset[index];
-                    return '\n' + data.commit.message + '\n\n' + data.commit.timestamp + ' committed by @' + data.commit.committer.username + '\n';
+                    const it = items[0];
+                    const d = series[it.datasetIndex].aligned[it.index];
+                    if (!d) return '';
+                    return '\n' + d.commit.message + '\n\n' + d.commit.timestamp + ' committed by @' + d.commit.committer.username + '\n';
                   },
                   label: item => {
+                    const d = series[item.datasetIndex].aligned[item.index];
                     let label = item.value;
-                    const { range, unit } = dataset[item.index].bench;
-                    label += ' ' + unit;
-                    if (range) {
-                      label += ' (' + range + ')';
+                    if (d) {
+                      const { range, unit } = d.bench;
+                      label += ' ' + unit;
+                      if (range) {
+                        label += ' (' + range + ')';
+                      }
                     }
-                    return label;
+                    return series[item.datasetIndex].label + ': ' + label;
                   },
                   afterLabel: item => {
-                    const { extra } = dataset[item.index].bench;
-                    return extra ? '\n' + extra : '';
+                    const d = series[item.datasetIndex].aligned[item.index];
+                    return d && d.bench.extra ? '\n' + d.bench.extra : '';
                   }
                 }
               },
@@ -236,9 +259,11 @@
                   return;
                 }
                 // XXX: Undocumented. How can we know the index?
-                const index = activeElems[0]._index;
-                const url = dataset[index].commit.url;
-                window.open(url, '_blank');
+                const el = activeElems[0];
+                const d = series[el._datasetIndex].aligned[el._index];
+                if (d) {
+                  window.open(d.commit.url, '_blank');
+                }
               },
             };
 
@@ -263,8 +288,36 @@
             graphsElem.className = 'benchmark-graphs';
             setElem.appendChild(graphsElem);
 
+            // Pair each implementation benchmark with its `_Baseline` counterpart
+            // so both render as two lines on one chart.
+            const IMPL_COLOR = '#178600';
+            const BASELINE_COLOR = '#0b84ce';
+            const groups = new Map(); // groupKey -> { impl, baseline }
+            const order = [];
             for (const [benchName, benches] of benchSet.entries()) {
-              renderGraph(graphsElem, benchName, benches)
+              // BM_PutGet is the legacy single-op benchmark; drop it.
+              if (benchName === 'BM_PutGet') {
+                continue;
+              }
+              const isBaseline = benchName.includes('_Baseline');
+              const key = benchName.replace('_Baseline', '');
+              if (!groups.has(key)) {
+                groups.set(key, {});
+                order.push(key);
+              }
+              groups.get(key)[isBaseline ? 'baseline' : 'impl'] = benches;
+            }
+
+            for (const key of order) {
+              const g = groups.get(key);
+              const series = [];
+              if (g.impl) {
+                series.push({ label: key, dataset: g.impl, color: IMPL_COLOR });
+              }
+              if (g.baseline) {
+                series.push({ label: key + ' (unordered_map)', dataset: g.baseline, color: BASELINE_COLOR });
+              }
+              renderGraph(graphsElem, key, series);
             }
           }
 
