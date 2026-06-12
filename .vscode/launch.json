@@ -6,7 +6,9 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/lru_cache_test",
-            "args": [], // e.g. ["--gtest_filter=IntLruCacheEdge.*"]
+            // eg: "args": ["--gtest_filter=CopyCtorAndAssignment.CopyAssignmentClearOriginalData"], 
+            // e.g. ["--gtest_filter=IntLruCacheEdge.*"]
+            "args": [],
             "cwd": "${workspaceFolder}/build",
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",

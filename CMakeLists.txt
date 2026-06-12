@@ -50,6 +50,13 @@ add_executable(lru_cache_test
 
 target_compile_options(lru_cache_test PRIVATE -Wall -Wextra -Wpedantic)
 
+option(ENABLE_TSAN "Build with ThreadSanitizer" OFF)
+if(ENABLE_TSAN)
+  add_compile_options(-fsanitize=thread)
+  add_link_options(-fsanitize=thread)
+  target_compile_options(lru_cache_test PRIVATE -DTSAN_ENABLED)
+endif()
+
 target_link_libraries(lru_cache_test PRIVATE
   lru_cache
   GTest::gtest_main   # provides `int main()` so we don't have to write one
@@ -59,4 +66,8 @@ target_link_libraries(lru_cache_test PRIVATE
 # and registers them individually with CTest. Run them with `ctest` from the
 # build dir, or run the binary directly to see gtest's own output.
 include(GoogleTest)
-gtest_discover_tests(lru_cache_test)
+
+# PRE_TEST: enumerate tests at ctest time, not post-build, so a sanitized
+# binary is never run during the build step (avoids spurious build failures
+# when TSan/ASan crash before the test bodies even execute).
+gtest_discover_tests(lru_cache_test DISCOVERY_MODE PRE_TEST)

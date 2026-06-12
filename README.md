@@ -15,14 +15,24 @@ sudo apt update && sudo apt install -y cmake g++ git
 ## Commands
 
 ```bash
-# Configure
+# Build and run tests
+## Configure
 cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Debug
 
-# Build
+## Build
 cmake --build ./build
 
-# Run tests
+## Run tests
 ctest --test-dir ./build --output-on-failure
+
+# Build and run tests with tsan
+cmake -S . -B ./build-tsan -DCMAKE_BUILD_TYPE=Debug -DENABLE_TSAN=ON
+
+## Build
+cmake --build ./build-tsan
+
+## Run tests
+ctest --test-dir ./build-tsan --output-on-failure
 ```
 
 ## Report and Dashboard
